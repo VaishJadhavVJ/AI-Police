@@ -58,6 +58,7 @@ def main():
                     "bug": "clean",
                     "status": "PASS" if clean_run.returncode == 0 else "FAIL",
                     "detail": f"pytest exit {clean_run.returncode}",
+                    "pytest_exit_code": clean_run.returncode,
                 }
             )
 
@@ -70,6 +71,7 @@ def main():
                             "bug": bug["id"],
                             "status": "FAIL",
                             "detail": error,
+                            "pytest_exit_code": None,
                         }
                     )
                     continue
@@ -87,8 +89,27 @@ def main():
                         "bug": bug["id"],
                         "status": "PASS" if caught else "FAIL",
                         "detail": f"pytest exit {mutant_run.returncode}",
+                        "pytest_exit_code": mutant_run.returncode,
                     }
                 )
+
+    output_path = ROOT / "results" / "milestone1_validation.json"
+    output_path.parent.mkdir(exist_ok=True)
+    output_path.write_text(
+        json.dumps(
+            [
+                {
+                    "app": result["app"],
+                    "bug": result["bug"],
+                    "result": result["status"],
+                    "pytest_exit_code": result["pytest_exit_code"],
+                }
+                for result in results
+            ],
+            indent=2,
+        )
+        + "\n"
+    )
 
     print("app                 bug                         result  detail")
     print("------------------  --------------------------  ------  -------------")
