@@ -1,3 +1,5 @@
+import pytest
+
 from app import create_app
 
 
@@ -10,7 +12,7 @@ def test_fahrenheit_to_celsius():
     )
 
     # (212 - 32) * 5 / 9 = 100
-    assert response.get_json()["result"] == 100.0
+    assert response.get_json()["result"] == pytest.approx(100.0)
 
 
 def test_kilometers_to_miles():
@@ -22,4 +24,4 @@ def test_kilometers_to_miles():
     )
 
     # 10 * 0.621371 = 6.21371
-    assert response.get_json()["result"] == 6.21371
+    assert response.get_json()["result"] == pytest.approx(6.21371)
