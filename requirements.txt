@@ -1,6 +1,10 @@
 flask
 pytest
+langgraph
+langchain-openai
 flask
 pytest
 flask
 pytest
+langchain-openai
+langgraph
