@@ -1,0 +1,16 @@
+[
+  {
+    "id": "fahrenheit-operation-order",
+    "operator": "replace",
+    "description": "Perform the Fahrenheit conversion operations in the wrong order.",
+    "find": "return (fahrenheit - 32) * 5 / 9",
+    "replace": "return fahrenheit - 32 * 5 / 9"
+  },
+  {
+    "id": "kilometer-factor-inverted",
+    "operator": "replace",
+    "description": "Invert the kilometer-to-mile conversion factor.",
+    "find": "return kilometers * 0.621371",
+    "replace": "return kilometers / 0.621371"
+  }
+]
