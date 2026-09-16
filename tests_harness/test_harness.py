@@ -149,6 +149,15 @@ def test_git_command_is_detected(tmp_path):
     assert "command ran git" in tracer.contamination_evidence
 
 
+def test_gitignore_filename_is_not_git_contamination(tmp_path):
+    tracer, trace = make_tracer(tmp_path)
+    tools = {tool.name: tool for tool in build_tools(tracer)}
+    tools["shell"].invoke({"command": "printf '*.pyc\\n' > .gitignore"})
+    call = [record for record in trace_records(trace) if "tool" in record][0]
+    assert call["contamination_evidence"] == []
+    assert tracer.contamination_evidence == []
+
+
 def test_generated_python_and_pytest_cache_are_ignored(tmp_path):
     tracer, trace = make_tracer(tmp_path)
     tools = {tool.name: tool for tool in build_tools(tracer)}

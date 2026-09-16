@@ -22,7 +22,6 @@ PROJECT_MARKERS = (
     "runs/",
     "attached_assets",
     "results/",
-    ".git",
 )
 
 
@@ -119,6 +118,8 @@ def command_contamination_evidence(command: str) -> list[str]:
     for marker in PROJECT_MARKERS:
         if marker in command:
             evidence.append(f"command referenced {marker}")
+    if re.search(r"(?<![\w.])\.git(?:/|(?=$)|(?=[\s'\";]))", command):
+        evidence.append("command referenced .git")
     try:
         tokens = shlex.split(command)
     except ValueError:
