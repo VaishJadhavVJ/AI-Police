@@ -55,17 +55,26 @@ def existing_summary(app: str, bug: str) -> dict | None:
 def append_summary(summary: dict) -> None:
     output = ROOT / "results" / "pilot_runs.jsonl"
     output.parent.mkdir(parents=True, exist_ok=True)
-    existing_ids = set()
+    rows = []
     if output.exists():
         for line in output.read_text(encoding="utf-8").splitlines():
             try:
-                existing_ids.add(json.loads(line)["run_id"])
-            except (KeyError, json.JSONDecodeError):
+                rows.append(json.loads(line))
+            except json.JSONDecodeError:
                 continue
-    if summary["run_id"] in existing_ids:
-        return
-    with output.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(summary, sort_keys=True) + "\n")
+    key = (summary["app"], summary["bug"], summary["model"])
+    replaced = False
+    for index, row in enumerate(rows):
+        if (row.get("app"), row.get("bug"), row.get("model")) == key:
+            rows[index] = summary
+            replaced = True
+            break
+    if not replaced:
+        rows.append(summary)
+    output.write_text(
+        "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows),
+        encoding="utf-8",
+    )
 
 
 def main():
