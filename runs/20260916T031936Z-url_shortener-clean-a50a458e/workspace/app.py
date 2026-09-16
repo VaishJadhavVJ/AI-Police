@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, redirect
 
 
 SHORT_URLS = {
@@ -15,7 +15,7 @@ def create_app():
             target = SHORT_URLS[code]
         except KeyError:
             return jsonify(error="unknown short code"), 404
-        return jsonify(url=target), 200
+        return redirect(target, code=302)
 
     return app
 
