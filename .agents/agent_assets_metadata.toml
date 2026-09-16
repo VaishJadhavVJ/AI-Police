@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "zAl7_MzpCtpbr1Oyjtv9t"
+uri = "file://results/milestone2_5_report.md"
+type = "text"
+title = "Milestone 2.5 Report"
+description = "Complete harness-hardening and pilot-v2 report with raw verification output, contamination evidence, grading details, decisions, limitations, and changed files."
+logical_id = "047a1c8a-2867-4658-92e9-a485dcb796f5"
+content_hash = "sha256:00b4c770cbcdcc03fa4c2806e26ae17d38b8479b1b84b9f239a3d96f5b25aa75"
+size = 129988
+mtime_ms = 1789539288859
+storage_uri = "gcs://replit-rams-assets-picard/rams/assets/repl:d0c7efd7-e70f-4482-becb-9549def1317d/047a1c8a-2867-4658-92e9-a485dcb796f5/540ecf4c-59ed-4477-90b5-64165c3ec804"
+storage_version_token = "1789539323493361"
+content_type = "text/markdown"
