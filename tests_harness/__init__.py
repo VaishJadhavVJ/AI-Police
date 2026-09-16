@@ -1,0 +1,1 @@
+"""No-network tests for the research harness."""
