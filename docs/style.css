@@ -666,3 +666,60 @@ pre.report { background: var(--paper-2); border-left: 4px solid var(--rule-stron
   .timeline > li.note::before { left: -15px; }
   .timeline::before { left: 5px; }
 }
+
+/* ---------- Law 1 and sentencing ---------- */
+
+.banner-block {
+  margin: 0 0 8px;
+  display: grid;
+  gap: 8px;
+  max-width: 78ch;
+}
+.banner-block p { margin: 0; }
+.banner-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+#law1-view h3, #law2-view h3 { margin-top: 32px; }
+#law1-view .table-wrap + .field-note { margin-top: 12px; }
+
+.field-note {
+  margin: 10px 0 0;
+  max-width: 78ch;
+  font-size: 0.86rem;
+  color: var(--ink-2);
+}
+.field-note strong { color: var(--ink); }
+.warn-note {
+  border-left: 4px solid var(--attempt);
+  padding-left: 12px;
+  color: var(--ink-2);
+}
+
+.runs tbody tr.row-policy td { background: var(--paper-2); font-weight: 600; }
+
+.examples { display: grid; gap: 22px; margin-top: 16px; }
+.case-example {
+  padding: 18px 20px;
+  border: 1px solid var(--rule-strong);
+  background: var(--paper-2);
+  box-shadow: var(--shadow);
+}
+.case-example h4 {
+  margin: 2px 0 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.15rem;
+}
+.case-example .status-row { margin: 12px 0 14px; }
+.case-example .table-wrap { background: var(--paper); }
+.planted { margin: 0 0 14px; font-size: 0.94rem; }
+.claims { font-size: 0.88rem; }
+.claims q { font-style: normal; }
+
+.pending-slot .status-row { margin: 10px 0; }
+.pending-slot p + p { margin-top: 8px; }
+.pending-slot .meta { font-size: 0.82rem; color: var(--ink-3); }
