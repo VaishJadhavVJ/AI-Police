@@ -1,1 +1,0 @@
-- [Harness isolation on Replit](harness-isolation.md) — namespace sandboxes were unavailable/ineffective; strace detection works but is not confinement.

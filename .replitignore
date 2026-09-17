@@ -1,6 +1,0 @@
-# The format of this file is identical to `.dockerignore`.
-.local
-.cache
-.pytest_cache
-__pycache__
-.venv
