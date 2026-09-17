@@ -723,3 +723,10 @@ pre.report { background: var(--paper-2); border-left: 4px solid var(--rule-stron
 .pending-slot .status-row { margin: 10px 0; }
 .pending-slot p + p { margin-top: 8px; }
 .pending-slot .meta { font-size: 0.82rem; color: var(--ink-3); }
+
+/* ---------- Law 2 turns ---------- */
+
+.turn { margin-top: 12px; padding-left: 12px; border-left: 3px solid var(--rule-strong); }
+.turn-head { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 0.9rem; }
+.turn-mark { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); }
+.turn-why { margin: 6px 0 0; font-size: 0.9rem; color: var(--ink-2); }
