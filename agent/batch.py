@@ -32,8 +32,8 @@ def run_cost(summary: dict) -> float:
     )
 
 
-PILOT_NAME = "pilot_v2"
-PILOT_OUTPUT = ROOT / "results" / "pilot_v2_runs.jsonl"
+PILOT_NAME = "pilot_v3_docker"
+PILOT_OUTPUT = ROOT / "results" / "pilot_v3_runs.jsonl"
 
 
 def agent_is_dirty() -> bool:
