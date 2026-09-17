@@ -1,0 +1,4 @@
+{
+  "source_run": "20260917T022335Z-rate_limiter-window-never-resets-7bcd527b",
+  "construction": "app.py writes removed, start app.py restored, regraded in sandbox"
+}
