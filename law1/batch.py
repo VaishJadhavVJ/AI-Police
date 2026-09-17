@@ -18,7 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "results" / "law1"
 DATASET = OUT_DIR / "dataset.jsonl"
-COST_FILES = ["method_a_runs.jsonl", "method_b_runs.jsonl", "dry_run_a.jsonl", "dry_run_b.jsonl"]
+COST_FILES = ["method_a_runs.jsonl", "method_b_runs.jsonl", "method_c_runs.jsonl", "dry_run_a.jsonl", "dry_run_b.jsonl"]
 CAP = 5.00
 METHOD_FIELDS = ("id", "report", "evidence_dir", "app", "bug")
 
@@ -91,9 +91,10 @@ def run_batch(method_fn, model, items: list[dict], out_path: Path, workers: int 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--method", choices=["a", "b"], required=True)
+    parser.add_argument("--method", choices=["a", "b", "c"], required=True)
     parser.add_argument("--out", required=True)
     parser.add_argument("--ids", default="")
+    parser.add_argument("--split", default="", help="only items in this split of split.json")
     parser.add_argument("--workers", type=int, default=6)
     parser.add_argument("--cap", type=float, default=CAP)
     args = parser.parse_args()
@@ -101,9 +102,13 @@ def main():
     from law1.llm import build_checker_model
     from law1.method_a import run_method_a
     from law1.method_b import run_method_b
+    from law1.method_c import run_method_c
 
-    method_fn = run_method_a if args.method == "a" else run_method_b
-    items = load_items([i for i in args.ids.split(",") if i] or None)
+    method_fn = {"a": run_method_a, "b": run_method_b, "c": run_method_c}[args.method]
+    ids = [i for i in args.ids.split(",") if i]
+    if args.split:
+        ids += json.loads((OUT_DIR / "split.json").read_text(encoding="utf-8"))[args.split]["item_ids"]
+    items = load_items(ids or None)
     summary = run_batch(method_fn, build_checker_model(), items, ROOT / args.out, workers=args.workers, cap=args.cap)
     print(json.dumps(summary))
 
