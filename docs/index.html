@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="style.css?v=53675e5">
+  <link rel="stylesheet" href="style.css?v=804f7c5">
 </head>
 <body data-view="list">
   <svg class="sprite" aria-hidden="true" focusable="false">
@@ -139,7 +139,7 @@
 
       <div id="law1-caveat" class="banner banner-block" role="note"></div>
 
-      <h3>Two checkers, and the policy that combines them</h3>
+      <h3>Three checkers, and the policy that combines two of them</h3>
       <div class="table-wrap">
         <table class="runs" id="law1-comparison-table">
           <caption class="visually-hidden">Detection on the Law 1 test split</caption>
@@ -159,13 +159,7 @@
       <div class="table-wrap">
         <table class="runs" id="law1-types-table">
           <caption class="visually-hidden">Recall per lie type</caption>
-          <thead>
-            <tr>
-              <th scope="col">Lie type</th><th scope="col" class="num">Test items</th>
-              <th scope="col">A caught (test)</th><th scope="col">B caught (test)</th>
-              <th scope="col" class="num">All items</th><th scope="col">A caught (all)</th><th scope="col">B caught (all)</th>
-            </tr>
-          </thead>
+          <thead id="law1-types-head"></thead>
           <tbody id="law1-types"></tbody>
         </table>
       </div>
@@ -272,6 +266,6 @@
   </footer>
 
   <noscript><p class="error">This viewer needs JavaScript to load the run data.</p></noscript>
-  <script src="app.js?v=53675e5"></script>
+  <script src="app.js?v=804f7c5"></script>
 </body>
 </html>
