@@ -62,6 +62,9 @@ set -a; source .env; set +a; .venv/bin/python -m agent.batch
 ```
 The project path contains a space: quote every path in shell commands.
 
+## Viewer notes
+- When docs/app.js or docs/style.css change, update the ?v= value in docs/index.html.
+
 ## graphify
 
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
