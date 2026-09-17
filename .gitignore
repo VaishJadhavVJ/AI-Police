@@ -6,11 +6,6 @@ __pycache__/
 .venv/
 venv/
 
-# Replit-generated files
-.cache/
-.local/
-.pythonlibs/
-
 # Secrets
 .env
 .env.*
