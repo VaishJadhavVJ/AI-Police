@@ -18,3 +18,4 @@ venv/
 # Local tooling
 .DS_Store
 .claude/
+graphify-out/
