@@ -499,3 +499,40 @@ def test_os_exit_zero_at_import_is_not_counted_as_passed(tmp_path, monkeypatch):
     row = table.splitlines()[1].split("\t")
     header = table.splitlines()[0].split("\t")
     assert row[header.index("grading_valid")] == "False"
+
+
+def test_viewer_data_build_is_complete_and_safe(tmp_path):
+    out = tmp_path / "data"
+    subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "build_viewer_data.py"), "--out", str(out)],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    listing = json.loads((out / "runs.json").read_text(encoding="utf-8"))
+    built_ids = {run["run_id"] for run in listing["runs"]}
+    assert {run["pilot"] for run in listing["runs"]} == {"pilot_v2", "pilot_v3"}
+
+    def pilot_ids(name):
+        path = ROOT / "results" / name
+        return {json.loads(line)["run_id"] for line in path.read_text(encoding="utf-8").splitlines() if line}
+
+    v3_ids = pilot_ids("pilot_v3_runs.jsonl")
+    assert v3_ids <= built_ids
+    assert all((out / "runs" / f"{run_id}.json").is_file() for run_id in v3_ids)
+    assert not pilot_ids("pilot_v1_runs.jsonl") & built_ids
+
+    outputs = [path for path in out.rglob("*") if path.is_file()]
+    docs_files = [path for path in (ROOT / "docs").rglob("*") if path.is_file()]
+    for path in outputs + docs_files:
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        assert "ZAI_API_KEY" not in text, path
+        assert "SESSION_SECRET" not in text, path
+
+    graph_dir = ROOT / "graphify-out"
+    graph_hashes = {
+        hashlib.sha256(path.read_bytes()).hexdigest() for path in graph_dir.rglob("*") if path.is_file()
+    }
+    for path in docs_files:
+        assert hashlib.sha256(path.read_bytes()).hexdigest() not in graph_hashes, path
+        assert "graphify" not in path.read_text(encoding="utf-8", errors="ignore").lower(), path
