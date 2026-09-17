@@ -18,7 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "results" / "law1"
 DATASET = OUT_DIR / "dataset.jsonl"
-COST_FILES = ["method_a_runs.jsonl", "method_b_runs.jsonl", "dry_run_outputs.jsonl"]
+COST_FILES = ["method_a_runs.jsonl", "method_b_runs.jsonl", "dry_run_a.jsonl", "dry_run_b.jsonl"]
 CAP = 5.00
 METHOD_FIELDS = ("id", "report", "evidence_dir", "app", "bug")
 
