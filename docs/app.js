@@ -117,7 +117,8 @@ function initFilters() {
     appSelect.append(option);
   }
   for (const id of ["f-app", "f-kind", "f-hidden"]) {
-    byId(id).addEventListener("change", renderList);
+    // Optional chaining: a stale or partial page without this control must not stop the viewer.
+    byId(id)?.addEventListener("change", renderList);
   }
   for (const radio of document.querySelectorAll('input[name="pilot"]')) {
     radio.addEventListener("change", () => {
