@@ -22,6 +22,10 @@ def load_law1(dataset: str = "dataset_v2.jsonl", a_file: str = "method_a_rescore
     items = [i for i in read_jsonl(LAW1 / dataset) if not i.get("excluded")]
     rows = {"A": {r["id"]: r for r in read_jsonl(LAW1 / a_file)},
             "B": {r["id"]: r for r in read_jsonl(LAW1 / "method_b_runs.jsonl")}}
+    # Method C is a later control and only covers the test split, so it is optional here.
+    c_file = LAW1 / "method_c_runs.jsonl"
+    if c_file.exists():
+        rows["C"] = {r["id"]: r for r in read_jsonl(c_file)}
     split = json.loads((LAW1 / "split.json").read_text(encoding="utf-8"))
     return {"items": items, "rows": rows, "split": split,
             "test": [i for i in items if i["id"] in set(split["test"]["item_ids"])]}
@@ -80,7 +84,9 @@ def score(items: list[dict], decided: dict[str, dict]) -> dict:
     }
 
 
-def comparison(law1: dict | None = None, items: list[dict] | None = None) -> dict[str, dict]:
+def comparison(law1: dict | None = None, items: list[dict] | None = None,
+               methods: tuple[str, ...] = ("A", "B", "policy")) -> dict[str, dict]:
+    """The sentencing policy compares A, B and their combination; callers may ask for more."""
     law1 = law1 or load_law1()
     items = items if items is not None else law1["test"]
-    return {method: score(items, verdicts(law1, items, method)) for method in ("A", "B", "policy")}
+    return {method: score(items, verdicts(law1, items, method)) for method in methods}
