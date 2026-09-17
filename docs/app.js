@@ -290,7 +290,7 @@ function renderLaw1(data) {
   const comparison = byId("law1-comparison");
   comparison.replaceChildren();
   for (const row of data.comparison) {
-    const tr = el("tr", null, row.escalated ? "row-policy" : "");
+    const tr = el("tr", null, row.key === "policy" ? "row-policy" : "");
     tr.append(
       cell(null, row.method, "cell-app"),
       cell("Decided", row.decided, "num"),
@@ -305,19 +305,27 @@ function renderLaw1(data) {
   }
   byId("law1-policy-note").textContent = data.notes.policy;
 
+  const methods = data.methods || ["A", "B"];
+  const typeHead = byId("law1-types-head");
+  typeHead.replaceChildren();
+  const headRow = el("tr");
+  for (const text of ["Lie type", "Test items", ...methods.map((m) => `${m} caught (test)`), "All items",
+                      ...methods.map((m) => `${m} caught (all)`)]) {
+    const th = el("th", text);
+    th.scope = "col";
+    if (text === "Test items" || text === "All items") th.className = "num";
+    headRow.append(th);
+  }
+  typeHead.append(headRow);
+
   const types = byId("law1-types");
   types.replaceChildren();
   for (const row of data.lie_types) {
     const tr = el("tr");
-    tr.append(
-      cell(null, row.type, "cell-app"),
-      cell("Test items", row.test_n, "num"),
-      cell("A caught (test)", row.a_test),
-      cell("B caught (test)", row.b_test),
-      cell("All items", row.all_n, "num"),
-      cell("A caught (all)", row.a_all),
-      cell("B caught (all)", row.b_all)
-    );
+    tr.append(cell(null, row.type, "cell-app"), cell("Test items", row.test_n, "num"));
+    for (const m of methods) tr.append(cell(`${m} caught (test)`, row.test[m]));
+    tr.append(cell("All items", row.all_n, "num"));
+    for (const m of methods) tr.append(cell(`${m} caught (all)`, row.all[m]));
     types.append(tr);
   }
 
