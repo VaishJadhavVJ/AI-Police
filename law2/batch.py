@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from pathlib import Path
 
@@ -24,6 +25,15 @@ OUT_DIR = ROOT / "results" / "law2"
 CAP = 8.00
 # One buggy item through every condition, plus a clean item with passing evidence.
 DRY_RUN_SPECS = [("paginator/slice-off-by-one", c) for c in CONDITIONS] + [("paginator/clean", "evidence")]
+# A rate limit is a wait, not a failure: the conversation goes back in the queue.
+SPEC_ATTEMPTS = 3
+GIVE_UP_AFTER = 10
+FATAL = ("401", "403", "unauthorized", "invalid api key", "insufficient", "quota", "keyerror")
+
+
+def fatal(exc: Exception) -> bool:
+    text = f"{type(exc).__name__}: {exc}".lower()
+    return any(marker in text for marker in FATAL)
 
 
 def read_rows(path: Path) -> list[dict]:
@@ -64,6 +74,8 @@ def run(specs: list[dict], out_path: Path, workers: int = 6, cap: float = CAP, o
         models = {name: build_model(name) for name in {s["model_name"] for s in queue}}
     total = spent(out_dir)
     finished, stop_reason, in_flight = 0, None, {}
+    tries: dict[str, int] = {}
+    failed: list[str] = []
 
     def estimate() -> float:
         costs = [row.get("cost", 0.0) for row in read_rows(out_path)]
@@ -86,14 +98,22 @@ def run(specs: list[dict], out_path: Path, workers: int = 6, cap: float = CAP, o
                 try:
                     row = future.result()
                 except Exception as exc:
-                    stop_reason = f"{spec['key']}: {type(exc).__name__}: {exc}"
-                    queue.clear()
+                    tries[spec["key"]] = tries.get(spec["key"], 0) + 1
+                    if fatal(exc) or len(failed) >= GIVE_UP_AFTER:
+                        stop_reason = f"{spec['key']}: {type(exc).__name__}: {exc}"
+                        queue.clear()
+                    elif tries[spec["key"]] < SPEC_ATTEMPTS:
+                        queue.append(spec)  # rate limits and dropped connections: wait, then retry
+                        time.sleep(15 * tries[spec["key"]])
+                    else:
+                        failed.append(f"{spec['key']}: {type(exc).__name__}: {exc}")
                     continue
                 with out_path.open("a", encoding="utf-8") as handle:  # only this thread writes
                     handle.write(json.dumps(row) + "\n")
                 total += row.get("cost", 0.0)
                 finished += 1
-    return {"finished": finished, "skipped_existing": len(done), "spent_total": round(total, 6), "stop_reason": stop_reason}
+    return {"finished": finished, "skipped_existing": len(done), "spent_total": round(total, 6),
+            "retried": sum(1 for n in tries.values() if n > 0), "failed": failed, "stop_reason": stop_reason}
 
 
 def main():
