@@ -1,6 +1,7 @@
 # Python
 __pycache__/
 *.py[cod]
+*.pyc
 .pytest_cache/
 .venv/
 venv/
@@ -9,3 +10,11 @@ venv/
 .cache/
 .local/
 .pythonlibs/
+
+# Secrets
+.env
+.env.*
+
+# Local tooling
+.DS_Store
+.claude/
