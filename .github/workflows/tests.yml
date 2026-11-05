@@ -24,3 +24,4 @@ jobs:
       - run: docker build -t ai-police-sandbox:1 sandbox
       - run: python validate.py
       - run: python -m pytest tests_harness -q
+      - run: python -m pytest law1 law2 sanctions -q
