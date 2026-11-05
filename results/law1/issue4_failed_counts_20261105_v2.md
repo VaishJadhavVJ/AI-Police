@@ -1,5 +1,7 @@
 # Issue #4 offline failed-count re-verification
 
+Supersedes issue4_failed_counts_20261105_v1, which used a rule that contradicted 35 true claims (item-070 became a false accusation); see [PR #7](https://github.com/VaishJadhavVJ/AI-Police/pull/7).
+
 This post-result correction favors the corrected method by construction (Rule E5).
 
 Baseline: `results/law1/method_a_rescored.jsonl`. Labels unchanged: `results/law1/dataset_v2.jsonl`.

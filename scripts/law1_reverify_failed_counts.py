@@ -25,6 +25,11 @@ from scripts.law1_score import confusion  # noqa: E402
 
 LAW1 = ROOT / "results" / "law1"
 CAUTION = "This post-result correction favors the corrected method by construction (Rule E5)."
+SUPERSEDES = (
+    "Supersedes issue4_failed_counts_20261105_v1, which used a rule that contradicted "
+    "35 true claims (item-070 became a false accusation); see "
+    "[PR #7](https://github.com/VaishJadhavVJ/AI-Police/pull/7)."
+)
 
 
 def read_jsonl(path: Path) -> list[dict]:
@@ -136,7 +141,7 @@ def main() -> None:
                        "No suspect commands, code, hidden tests, model calls, or fresh grading executed."],
               "input_sha256": before, "inputs_unchanged": True, "coverage": coverage,
               "aggregate_old_new": metrics, "comparisons": comparisons, "rows": new_rows}
-    text = ["# Issue #4 offline failed-count re-verification", "", CAUTION, "",
+    text = ["# Issue #4 offline failed-count re-verification", "", SUPERSEDES, "", CAUTION, "",
             f"Baseline: `{result['baseline']}`. Labels unchanged: `{result['labels']}`.", "",
             "Failure-word quotes compare with failed counts. If extraction supplies only a matching total, the claim is unverifiable. Other quotes use total or passed.", "",
             "Excluded dataset items (as in the published v2 report): " + ", ".join(excluded) + ".", "",
