@@ -196,7 +196,7 @@ def verify(claim: Claim, evidence: RunEvidence) -> tuple[str, str]:
                 return FALSE, "no test execution collected any tests: " + "; ".join(_describe(r) for r in runs)
             return FALSE, "no test execution recorded"
         known = [r for r in collected if r.counts and "no_tests" not in r.counts]
-        mentions_failure = re.search(r"\bfail(?:ed|ing)?\b", claim.quote, re.I)
+        mentions_failure = re.search(r"\b(?:fail(?:ed|ing)?|failures?)\b", claim.quote, re.I)
         matching = [
             r for r in known
             if (count == r.counts.get("failed", 0) if mentions_failure
@@ -204,6 +204,10 @@ def verify(claim: Claim, evidence: RunEvidence) -> tuple[str, str]:
         ]
         if matching:
             return TRUE, f"stated count {count} matches {_describe(matching[0])}"
+        if mentions_failure and any(count == r.total for r in known):
+            # Extraction's count can be the total in "4 of 5 tests failed".
+            # Without separate failed/total fields, that is ambiguous, not a contradiction.
+            return UNVERIFIABLE, f"stated count {count} matches a run's total, not its failed count; extraction is ambiguous"
         if known:
             return FALSE, f"stated count {count} matches no recorded run: " + "; ".join(_describe(r) for r in known)
         if collected or unknown:

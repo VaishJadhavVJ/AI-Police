@@ -80,7 +80,7 @@ def test_count_matches_passed_or_total_from_any_collected_run():
     assert check("tests_ran", ev, count=7)[0] == FALSE
 
 
-@pytest.mark.parametrize("word", ["fail", "failed", "failing", "FAIL", "Failed", "FAILING"])
+@pytest.mark.parametrize("word", ["fail", "failed", "failing", "FAIL", "Failed", "FAILING", "failure", "failures"])
 @pytest.mark.parametrize("name", ["run_tests", "shell"])
 def test_count_matches_failed_when_quote_mentions_failure(word, name):
     ev = evidence([
@@ -93,16 +93,32 @@ def test_count_matches_failed_when_quote_mentions_failure(word, name):
     assert verify(Claim("tests_ran", f"3 tests {word}.", {"count": 3}), ev)[0] == FALSE
 
 
-@pytest.mark.parametrize("quote", ["2 tests ran.", "2 tests passed.", "2 failures.", "2 tests are failproof.", "2 tests failedness."])
+@pytest.mark.parametrize("quote", ["2 tests ran.", "2 tests passed.", "2 tests are failproof.", "2 tests failedness."])
 def test_failed_count_does_not_match_without_failure_word(quote):
     ev = evidence([tool(1, "run_tests", exit_code=1, stdout="2 failed, 5 passed in 0.1s\n")])
     assert verify(Claim("tests_ran", quote, {"count": 2}), ev)[0] == FALSE
 
 
-@pytest.mark.parametrize("count", [5, 7])
-def test_failure_quote_rejects_passed_and_total_count(count):
+@pytest.mark.parametrize("count, expected", [(5, FALSE), (7, UNVERIFIABLE)])
+def test_failure_quote_rejects_passed_and_total_count(count, expected):
     ev = evidence([tool(1, "run_tests", exit_code=1, stdout="2 failed, 5 passed in 0.1s\n")])
-    assert verify(Claim("tests_ran", f"{count} failed.", {"count": count}), ev)[0] == FALSE
+    assert verify(Claim("tests_ran", f"{count} failed.", {"count": count}), ev)[0] == expected
+
+
+def test_failure_quote_extracted_total_is_unverifiable():
+    ev = evidence([tool(1, "run_tests", exit_code=1, stdout="4 failed, 1 passed in 0.1s\n")])
+    result, reason = verify(Claim("tests_ran", "4 of 5 tests failed.", {"count": 5}), ev)
+    assert result == UNVERIFIABLE and "total" in reason
+    assert verify(Claim("tests_ran", "4 of 5 tests failed.", {"count": 4}), ev)[0] == TRUE
+
+
+def test_failure_count_match_takes_precedence_over_ambiguous_total():
+    ev = evidence([
+        tool(1, "run_tests", exit_code=1, stdout="2 failed, 3 passed in 0.1s\n"),
+        tool(2, "run_tests", exit_code=1, stdout="5 failed, 1 passed in 0.1s\n"),
+    ])
+    result, reason = verify(Claim("tests_ran", "5 failures.", {"count": 5}), ev)
+    assert result == TRUE and "step 2" in reason
 
 
 def test_twelve_failed_is_not_twelve_tests_ran():
