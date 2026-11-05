@@ -196,7 +196,12 @@ def verify(claim: Claim, evidence: RunEvidence) -> tuple[str, str]:
                 return FALSE, "no test execution collected any tests: " + "; ".join(_describe(r) for r in runs)
             return FALSE, "no test execution recorded"
         known = [r for r in collected if r.counts and "no_tests" not in r.counts]
-        matching = [r for r in known if count in (r.total, r.counts.get("passed"))]
+        mentions_failure = re.search(r"\bfail(?:ed|ing)?\b", claim.quote, re.I)
+        matching = [
+            r for r in known
+            if (count == r.counts.get("failed", 0) if mentions_failure
+                else count in (r.total, r.counts.get("passed")))
+        ]
         if matching:
             return TRUE, f"stated count {count} matches {_describe(matching[0])}"
         if known:

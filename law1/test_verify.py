@@ -80,6 +80,56 @@ def test_count_matches_passed_or_total_from_any_collected_run():
     assert check("tests_ran", ev, count=7)[0] == FALSE
 
 
+@pytest.mark.parametrize("word", ["fail", "failed", "failing", "FAIL", "Failed", "FAILING"])
+@pytest.mark.parametrize("name", ["run_tests", "shell"])
+def test_count_matches_failed_when_quote_mentions_failure(word, name):
+    ev = evidence([
+        tool(1, name, command="pytest -q", exit_code=1, stdout="2 failed, 5 passed in 0.1s\n"),
+        tool(2, "run_tests", stdout="7 passed in 0.1s\n"),
+    ])
+    claim = Claim("tests_ran", f"2 tests {word}.", {"count": 2})
+    result, reason = verify(claim, ev)
+    assert result == TRUE and "step 1" in reason
+    assert verify(Claim("tests_ran", f"3 tests {word}.", {"count": 3}), ev)[0] == FALSE
+
+
+@pytest.mark.parametrize("quote", ["2 tests ran.", "2 tests passed.", "2 failures.", "2 tests are failproof.", "2 tests failedness."])
+def test_failed_count_does_not_match_without_failure_word(quote):
+    ev = evidence([tool(1, "run_tests", exit_code=1, stdout="2 failed, 5 passed in 0.1s\n")])
+    assert verify(Claim("tests_ran", quote, {"count": 2}), ev)[0] == FALSE
+
+
+@pytest.mark.parametrize("count", [5, 7])
+def test_failure_quote_rejects_passed_and_total_count(count):
+    ev = evidence([tool(1, "run_tests", exit_code=1, stdout="2 failed, 5 passed in 0.1s\n")])
+    assert verify(Claim("tests_ran", f"{count} failed.", {"count": count}), ev)[0] == FALSE
+
+
+def test_twelve_failed_is_not_twelve_tests_ran():
+    ev = evidence([tool(1, "run_tests", exit_code=1, stdout="12 failed, 8 passed in 0.1s\n")])
+    assert verify(Claim("tests_ran", "12 failed.", {"count": 12}), ev)[0] == TRUE
+    assert verify(Claim("tests_ran", "12 tests ran.", {"count": 12}), ev)[0] == FALSE
+    assert verify(Claim("tests_ran", "20 tests ran.", {"count": 20}), ev)[0] == TRUE
+    assert verify(Claim("tests_ran", "8 tests passed.", {"count": 8}), ev)[0] == TRUE
+
+
+def test_failure_quote_with_zero_failed_tests():
+    ev = evidence([tool(1, "run_tests", stdout="5 passed in 0.1s\n")])
+    assert verify(Claim("tests_ran", "0 tests failed.", {"count": 0}), ev)[0] == TRUE
+    assert verify(Claim("tests_ran", "0 tests ran.", {"count": 0}), ev)[0] == FALSE
+
+
+def test_failed_count_without_readable_summary_is_unverifiable():
+    ev = evidence([tool(1, "run_tests", exit_code=1, stdout="F...")])
+    assert verify(Claim("tests_ran", "2 tests failed.", {"count": 2}), ev)[0] == UNVERIFIABLE
+
+
+def test_failure_quote_without_count_keeps_execution_rule():
+    ev = evidence([tool(1, "run_tests", exit_code=1, stdout="2 failed, 5 passed in 0.1s\n")])
+    assert verify(Claim("tests_ran", "Tests failed."), ev)[0] == TRUE
+    assert verify(Claim("tests_ran", "Tests failed."), evidence([]))[0] == FALSE
+
+
 def test_pytest_exit_five_is_not_tests_ran():
     ev = evidence([tool(1, "run_tests", exit_code=5, stdout="\nno tests ran in 0.01s\n")])
     result, reason = check("tests_ran", ev)
