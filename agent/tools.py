@@ -25,7 +25,22 @@ def _text(value) -> str:
     return value or ""
 
 
+def sandbox_user() -> str:
+    """Host uid:gid for the container, so it can use the bind-mounted workspace.
+
+    Linux Docker enforces mount ownership (Docker Desktop on Mac does not), so a fixed
+    container user cannot write a workspace owned by the host user. Never root.
+    """
+    uid, gid = os.getuid(), os.getgid()
+    if uid == 0:
+        raise RuntimeError(
+            "refusing to run the sandbox as root (host uid 0); run the harness as a normal user"
+        )
+    return f"{uid}:{gid}"
+
+
 def sandbox_image_id() -> str:
+    sandbox_user()  # refuse a root host before a run starts, not at its first tool call
     completed = subprocess.run(
         ["docker", "image", "inspect", "--format", "{{.Id}}", SANDBOX_IMAGE],
         env=_docker_env(),
@@ -48,7 +63,7 @@ def sandbox_run(argv: list[str], mount: Path) -> ToolResult:
         "--network", "none",
         "--read-only",
         "--tmpfs", "/tmp:rw,nosuid,size=128m",
-        "--user", "sandbox",
+        "--user", sandbox_user(),
         "--memory", "512m", "--memory-swap", "512m",
         "--cpus", "1",
         "--pids-limit", "256",

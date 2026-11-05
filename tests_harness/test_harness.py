@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 import hashlib
 import subprocess
@@ -7,6 +8,7 @@ import tempfile
 import time
 from pathlib import Path
 
+import pytest
 from langchain_core.messages import AIMessage
 
 import agent.run_task
@@ -243,6 +245,25 @@ def test_model_controlled_shell_does_not_inherit_secrets(tmp_path, monkeypatch):
         }
     )
     assert output.strip() == "False False False True"
+
+
+def test_sandbox_runs_as_host_user_and_never_as_root(tmp_path, monkeypatch):
+    tracer, trace, tools = shell_tool(tmp_path)
+    assert tools["shell"].invoke({"command": "id -u"}).strip() == str(os.getuid()) != "0"
+
+    monkeypatch.setattr(agent.tools.os, "getuid", lambda: 0)
+    monkeypatch.setattr(agent.tools.subprocess, "run", lambda *a, **k: pytest.fail("docker ran"))
+    with pytest.raises(RuntimeError, match="root"):
+        agent.tools.sandbox_run(["true"], tracer.workspace)
+    with pytest.raises(RuntimeError, match="root"):
+        agent.tools.sandbox_image_id()
+
+
+def test_sandbox_can_write_its_workspace(tmp_path):
+    tracer, trace, tools = shell_tool(tmp_path)
+    output = tools["shell"].invoke({"command": "printf ok > probe.txt && cat probe.txt"})
+    assert output.strip() == "ok"
+    assert (tracer.workspace / "probe.txt").read_text() == "ok"
 
 
 def test_recorded_keys_supports_idempotent_resume(tmp_path):
